@@ -1,129 +1,112 @@
 package main
 
 import (
-    "fmt"
-    "log"
-    "strings"
-    "time"
+	"fmt"
+	"log"
+	"strings"
+	"time"
 
-    "net/http"
-    "golang.org/x/net/html"
-    "container/list"
+	"github.com/gocolly/colly/v2"
 )
 
-
 type Link struct {
-    URL string
+	URL string
 }
 
-func fetchLinks(pageURL string) []Link {
-    response, err := http.Get(pageURL)
-    if err != nil {
-        fmt.Println("Error:", err)
-        return nil
-    }
-    defer response.Body.Close()
+func fetchLinks(pageURL string) ([]Link, error) {
+	c := colly.NewCollector(
+		colly.AllowedDomains("en.wikipedia.org"),
+	)
 
-    document, err := html.Parse(response.Body)
-    if err != nil {
-        fmt.Println("Error:", err)
-        return nil
-    }
+	var links []Link
 
-    var links []Link
-    var explore func(*html.Node)
-    explore = func(n *html.Node) {
-        if n.Type == html.ElementNode && n.Data == "a" {
-            for _, attr := range n.Attr {
-                if attr.Key == "href" && strings.HasPrefix(attr.Val, "/wiki/") {
-                    validLink := true
-                    for _, class := range strings.Fields(attr.Val) {
-                        if class == "new" || strings.Contains(strings.ToLower(class), "portal") {
-                            validLink = false
-                            break
-                        }
-                    }
-                    if validLink && strings.HasPrefix(attr.Val, "/wiki/") && !strings.Contains(attr.Val, ":") {
-                        link := Link{
-                            URL:   "https://en.wikipedia.org" + attr.Val,
-                        }
-                        links = append(links, link)
-                    }
-                }
-            }
-        }
-        for c := n.FirstChild; c != nil; c = c.NextSibling {
-            explore(c)
-        }
-    }
-    explore(document)
+	c.OnHTML("a[href]", func(e *colly.HTMLElement) {
+		href := e.Attr("href")
+		if strings.HasPrefix(href, "/wiki/") {
+			link := Link{
+				URL: "https://en.wikipedia.org" + href,
+			}
+			links = append(links, link)
+		}
+	})
 
-    return links
+	err := c.Visit(pageURL)
+	if err != nil {
+		return nil, err
+	}
+
+	return links, nil
 }
-
 
 func BFS(startURL, endURL string) []Link {
-    queue := list.New()
-    visited := make(map[string]bool)
-    path := make(map[string][]Link)
+	queue := []Link{{URL: startURL}}
+	visited := make(map[string]bool)
+	path := make(map[string][]Link)
 
-    queue.PushBack([]Link{{URL: startURL}})
+	for len(queue) > 0 {
+		currentLink := queue[0]
+		queue = queue[1:]
 
-    for queue.Len() > 0 {
-        currentPath := queue.Remove(queue.Front()).([]Link)
-        currentLink := currentPath[len(currentPath)-1]
+		if currentLink.URL == endURL {
+			return path[currentLink.URL]
+		}
 
-        if currentLink.URL == endURL {
-            return currentPath
-        }
+		if visited[currentLink.URL] {
+			continue
+		}
 
-        links := fetchLinks(currentLink.URL)
-        for _, link := range links {
-            if !visited[link.URL] {
-                visited[link.URL] = true
-                newPath := append(currentPath, link)
-                queue.PushBack(newPath)
-                path[link.URL] = newPath
+		visited[currentLink.URL] = true
 
-                if link.URL == endURL {
-                    return newPath
-                }
-            }
-        }
-    }
+		links, err := fetchLinks(currentLink.URL)
+		if err != nil {
+			fmt.Println("Error fetching links:", err)
+			continue
+		}
 
-    return nil
+		for _, link := range links {
+			if !visited[link.URL] {
+				path[link.URL] = append(path[currentLink.URL], link)
+				queue = append(queue, link)
+
+				if link.URL == endURL {
+					return path[link.URL]
+				}
+			}
+		}
+	}
+
+	return nil
 }
 
 func main() {
-    var startPage, endPage string
+	var startPage, endPage string
 
-    fmt.Print("Masukkan judul halaman awal: ")
-    fmt.Scanln(&startPage)
+	fmt.Print("Masukkan judul halaman awal: ")
+	fmt.Scanln(&startPage)
 
-    fmt.Print("Masukkan judul halaman akhir: ")
-    fmt.Scanln(&endPage)
+	fmt.Print("Masukkan judul halaman akhir: ")
+	fmt.Scanln(&endPage)
 
-    startURL := "https://en.wikipedia.org/wiki/" + startPage
-    endURL := "https://en.wikipedia.org/wiki/" + endPage
+	startURL := "https://en.wikipedia.org/wiki/" + startPage
+	endURL := "https://en.wikipedia.org/wiki/" + endPage
 
-    startTime := time.Now()
+	startTime := time.Now()
 
-    shortest := BFS(startURL, endURL)
-    if shortest == nil {
-        log.Fatal("Tidak ditemukan jalur")
-    }
+	shortest := BFS(startURL, endURL)
+	if shortest == nil {
+		log.Fatal("Tidak ditemukan jalur")
+	}
 
-    fmt.Print("Jalur terpendek: ")
-    for _, link := range shortest {
-        fmt.Print(link.URL)
-        if link.URL != endURL {
-            fmt.Print(" > ")
-        } else {
-            fmt.Println()
-        }
-    }
-    endTime := time.Now()
-    elapsed := endTime.Sub(startTime)
-    fmt.Println("Waktu eksekusi:", elapsed)
+	fmt.Print("Jalur terpendek: ")
+	for _, link := range shortest {
+		fmt.Print(link.URL)
+		if link.URL != endURL {
+			fmt.Print(" > ")
+		} else {
+			fmt.Println()
+		}
+	}
+	endTime := time.Now()
+	elapsed := endTime.Sub(startTime)
+	fmt.Println("Waktu eksekusi:", elapsed)
 }
