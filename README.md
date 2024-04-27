@@ -10,9 +10,9 @@
 * [Author](#author)
 
 ## **General Information**
->WikiRun is a game involving Wikipedia, a free online encyclopedia managed by various volunteers worldwide, where players start at a Wikipedia article and must navigate through other articles on Wikipedia (by clicking links within each article) to reach another pre-determined article in the shortest time or with the fewest clicks (articles).
+WikiRun is a game involving Wikipedia, a free online encyclopedia managed by various volunteers worldwide, where players start at a Wikipedia article and must navigate through other articles on Wikipedia (by clicking links within each article) to reach another pre-determined article in the shortest time or with the fewest clicks (articles).
 
-noted : this is the github repository for the back end. Here is the github repository for the front end (git@github.com:Andhikafdh/Tubes2_FE_JoJiKa.git)
+>noted : this is the github repository for the back end. Here is the github repository for the front end (git@github.com:Andhikafdh/Tubes2_FE_JoJiKa.git)
 
 ## **Requirements**
 To use this program, you will need to install **GOlang** (https://go.dev/doc/install) on the device you are using. You will also need **Visual Studio** (https://visualstudio.microsoft.com/) to be installed before running the program.
@@ -47,23 +47,22 @@ $ go run .
 │   README.md
 │
 ├───doc
-│       fig1.png
-│       fig2.png
-│       fig3.png
-│       fig4.png
-│       Tubes2_K2_13521094_Spongebot.pdf
+│       JoJiKa.png
+│       JoJiKa.pdf
 │
 ├───src
-│       BFS.go
-│       go.mod
-│       go.sum
-│       IDS.go
-│               
-
+│    │  
+│    ├─── bfs
+│    │      BFS.go
+│    ├─── ids
+│    │      IDS.go
+│    ├─── go.mod
+          go.sum
+               
 ```
 
 ## Authors
-<img src="doc/JoJiKa.jpg" width="752" />
+<img src="doc/JoJiKa.png" width="752" />
 
 | Name                  | GitHub                                            | NIM                  |
 | --------------------- | ------------------------------------------------- | --------------------- |
