@@ -1,10 +1,8 @@
-package main
+package bfs
 
 import (
 	"fmt"
-	"log"
 	"strings"
-	"time"
 
 	"github.com/gocolly/colly/v2"
 )
@@ -78,35 +76,35 @@ func BFS(startURL, endURL string) []Link {
 	return nil
 }
 
-func main() {
-	var startPage, endPage string
+// func main() {
+// 	var startPage, endPage string
 
-	fmt.Print("Masukkan judul halaman awal: ")
-	fmt.Scanln(&startPage)
+// 	fmt.Print("Masukkan judul halaman awal: ")
+// 	fmt.Scanln(&startPage)
 
-	fmt.Print("Masukkan judul halaman akhir: ")
-	fmt.Scanln(&endPage)
+// 	fmt.Print("Masukkan judul halaman akhir: ")
+// 	fmt.Scanln(&endPage)
 
-	startURL := "https://en.wikipedia.org/wiki/" + startPage
-	endURL := "https://en.wikipedia.org/wiki/" + endPage
+// 	startURL := "https://en.wikipedia.org/wiki/" + startPage
+// 	endURL := "https://en.wikipedia.org/wiki/" + endPage
 
-	startTime := time.Now()
+// 	startTime := time.Now()
 
-	shortest := BFS(startURL, endURL)
-	if shortest == nil {
-		log.Fatal("Tidak ditemukan jalur")
-	}
+// 	shortest := BFS(startURL, endURL)
+// 	if shortest == nil {
+// 		log.Fatal("Tidak ditemukan jalur")
+// 	}
 
-	fmt.Print("Jalur terpendek: ")
-	for _, link := range shortest {
-		fmt.Print(link.URL)
-		if link.URL != endURL {
-			fmt.Print(" > ")
-		} else {
-			fmt.Println()
-		}
-	}
-	endTime := time.Now()
-	elapsed := endTime.Sub(startTime)
-	fmt.Println("Waktu eksekusi:", elapsed)
-}
+// 	fmt.Print("Jalur terpendek: ")
+// 	for _, link := range shortest {
+// 		fmt.Print(link.URL)
+// 		if link.URL != endURL {
+// 			fmt.Print(" > ")
+// 		} else {
+// 			fmt.Println()
+// 		}
+// 	}
+// 	endTime := time.Now()
+// 	elapsed := endTime.Sub(startTime)
+// 	fmt.Println("Waktu eksekusi:", elapsed)
+// }

@@ -1,4 +1,4 @@
-module BFS.go
+module jojika.go
 
 require github.com/gocolly/colly v1.2.0
 

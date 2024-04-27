@@ -1,12 +1,9 @@
-package main
+package ids
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
-	"net/http"
 	"strings"
-	"time"
 
 	"github.com/gocolly/colly"
 )
@@ -22,7 +19,7 @@ type Node struct {
 var linkCache = make(map[string][]*Node)
 
 // Function to fetch links from a given Wikipedia page using Colly
-func get_links(input string, parent *Node) []*Node {
+func GetLinks(input string, parent *Node) []*Node {
 	if nodes, ok := linkCache[input]; ok {
 		return nodes
 	}
@@ -67,7 +64,7 @@ func DLS(node *Node, goal string, depth int) *Node {
 		return node
 	}
 	if depth > 0 {
-		node.Children = get_links(strings.TrimPrefix(node.ID, "/wiki/"), node)
+		node.Children = GetLinks(strings.TrimPrefix(node.ID, "/wiki/"), node)
 		for _, child := range node.Children {
 			found := DLS(child, goal, depth-1)
 			if found != nil {
@@ -78,44 +75,43 @@ func DLS(node *Node, goal string, depth int) *Node {
 	return nil
 }
 
-// Main function to set up HTTP server and handle requests
-func main() {
-	http.HandleFunc("/api/ids", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		fmt.Println("Received a request")
+// func DriverIDS() {
+// 	http.HandleFunc("/api/ids", func(w http.ResponseWriter, r *http.Request) {
+// 		w.Header().Set("Access-Control-Allow-Origin", "*")
+// 		fmt.Println("Received a request")
 
-		startPage := r.URL.Query().Get("start")
-		endPage := r.URL.Query().Get("end")
+// 		startPage := r.URL.Query().Get("start")
+// 		endPage := r.URL.Query().Get("end")
 
-		fmt.Println("Connecting to Wikipedia...")
-		startTime := time.Now()
-		root := &Node{ID: "/wiki/" + startPage, Children: get_links(startPage, nil)}
-		result := IDS(root, "/wiki/"+endPage)
-		elapsedTime := time.Since(startTime)
+// 		fmt.Println("Connecting to Wikipedia...")
+// 		startTime := time.Now()
+// 		root := &Node{ID: "/wiki/" + startPage, Children: get_links(startPage, nil)}
+// 		result := IDS(root, "/wiki/"+endPage)
+// 		elapsedTime := time.Since(startTime)
 
-		if result != nil {
-			path := make([]string, 0)
-			for node := result; node != nil; node = node.Parent {
-				path = append([]string{node.ID}, path...)
-			}
+// 		if result != nil {
+// 			path := make([]string, 0)
+// 			for node := result; node != nil; node = node.Parent {
+// 				path = append([]string{node.ID}, path...)
+// 			}
 
-			response := map[string]interface{}{
-				"found":         true,
-				"node":          result.ID,
-				"path":          path,
-				"executionTime": elapsedTime.String(),
-			}
+// 			response := map[string]interface{}{
+// 				"found":         true,
+// 				"node":          result.ID,
+// 				"path":          path,
+// 				"executionTime": elapsedTime.String(),
+// 			}
 
-			json.NewEncoder(w).Encode(response)
-		} else {
-			response := map[string]interface{}{
-				"found":         false,
-				"executionTime": elapsedTime.String(),
-			}
+// 			json.NewEncoder(w).Encode(response)
+// 		} else {
+// 			response := map[string]interface{}{
+// 				"found":         false,
+// 				"executionTime": elapsedTime.String(),
+// 			}
 
-			json.NewEncoder(w).Encode(response)
-		}
-	})
+// 			json.NewEncoder(w).Encode(response)
+// 		}
+// 	})
 
-	log.Fatal(http.ListenAndServe(":8080", nil))
-}
+// 	log.Fatal(http.ListenAndServe(":8080", nil))
+// }
