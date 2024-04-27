@@ -20,7 +20,8 @@ func fetchLinks(pageURL string) ([]Link, error) {
 
 	c.OnHTML("a[href]", func(e *colly.HTMLElement) {
 		href := e.Attr("href")
-		if strings.HasPrefix(href, "/wiki/") {
+		// Filter hanya link yang menuju halaman artikel biasa, tidak termasuk halaman khusus.
+		if strings.HasPrefix(href, "/wiki/") && !strings.Contains(href, ":") {
 			link := Link{
 				URL: "https://en.wikipedia.org" + href,
 			}
@@ -40,6 +41,7 @@ func BFS(startURL, endURL string) []Link {
 	queue := []Link{{URL: startURL}}
 	visited := make(map[string]bool)
 	path := make(map[string][]Link)
+	path[startURL] = []Link{{URL: startURL}} // Initialize the path for the start URL
 
 	for len(queue) > 0 {
 		currentLink := queue[0]
@@ -63,7 +65,9 @@ func BFS(startURL, endURL string) []Link {
 
 		for _, link := range links {
 			if !visited[link.URL] {
-				path[link.URL] = append(path[currentLink.URL], link)
+				newPath := append([]Link(nil), path[currentLink.URL]...) // Copy current path
+				newPath = append(newPath, link)                          // Append new link to the path
+				path[link.URL] = newPath                                 // Update path for this link
 				queue = append(queue, link)
 
 				if link.URL == endURL {
