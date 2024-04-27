@@ -12,7 +12,7 @@ import (
 
 type Response struct {
 	Path    []string `json:"path"`
-	Time    string   `json:"time"`
+	Time    int64    `json:"time"`
 	Visited int      `json:"visited"`
 }
 
@@ -39,7 +39,7 @@ func main() {
 			}
 
 			// Write shortest path to response
-			json.NewEncoder(w).Encode(Response{Path: shortestPath, Time: elapsedTime.String(), Visited: visited})
+			json.NewEncoder(w).Encode(Response{Path: shortestPath, Time: elapsedTime.Milliseconds(), Visited: visited})
 		case "ids":
 			// Call IDS function from ids package
 			root := &ids.Node{ID: "/wiki/" + startPage, Children: ids.GetLinks(startPage, nil)} // Changed to GetLinks
@@ -53,7 +53,7 @@ func main() {
 			}
 
 			// Write result path to response
-			json.NewEncoder(w).Encode(Response{Path: path, Time: elapsedTime.String(), Visited: visited}) // Changed to use Response struct
+			json.NewEncoder(w).Encode(Response{Path: path, Time: elapsedTime.Milliseconds(), Visited: visited}) // Changed to use Response struct
 		default:
 			// Handle unknown method
 			http.Error(w, "Unknown method: "+method, http.StatusBadRequest)
