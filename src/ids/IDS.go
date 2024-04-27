@@ -8,71 +8,72 @@ import (
 	"github.com/gocolly/colly"
 )
 
-// Node structure to store Wikipedia page information
+// Struktur Node untuk menyimpan informasi halaman Wikipedia
 type Node struct {
-	ID       string
-	Parent   *Node
-	Children []*Node
+	ID       string  // ID unik untuk setiap node yang biasanya adalah URL halaman
+	Parent   *Node   // Referensi ke parent node
+	Children []*Node // Slice untuk menyimpan referensi ke child node
 }
 
-// Cache to store parsed links, speeding up repeated searches
+// Cache untuk menyimpan link yang sudah diparsing, mempercepat pencarian yang berulang
 var linkCache = make(map[string][]*Node)
 
-// Function to fetch links from a given Wikipedia page using Colly
+// Fungsi GetLinks untuk mengambil link dari halaman Wikipedia menggunakan Colly
 func GetLinks(input string, parent *Node) []*Node {
-	if nodes, ok := linkCache[input]; ok {
+	if nodes, ok := linkCache[input]; ok { // Cek jika link sudah ada di cache
 		return nodes
 	}
 
 	var nodes []*Node
-	collector := colly.NewCollector()
+	collector := colly.NewCollector() // Membuat instance collector baru dari Colly
 
-	// Filtering links based on criteria
+	// Mengatur filter untuk link yang ditemukan di halaman
 	collector.OnHTML("a[href]", func(e *colly.HTMLElement) {
 		href := e.Attr("href")
+		// Validasi link yang sesuai dengan kriteria tertentu
 		if strings.HasPrefix(href, "/wiki/") && !strings.Contains(href, ":") &&
 			!strings.Contains(href, "Main_Page") && !strings.Contains(href, "UTF-8") {
 			nodes = append(nodes, &Node{ID: href, Parent: parent})
 		}
 	})
 
-	// Start scraping
+	// Memulai scraping
 	err := collector.Visit(fmt.Sprintf("https://en.wikipedia.org/wiki/%s", input))
 	if err != nil {
-		log.Fatal("Failed to scrape the page: ", err)
+		log.Fatal("Gagal mengambil halaman: ", err)
 	}
 
-	linkCache[input] = nodes
+	linkCache[input] = nodes // Menyimpan hasil ke cache
 	return nodes
 }
 
-// Iterative Deepening Search (IDS)
+// (Iterative Deepening Search - IDS)
 func IDS(root *Node, goal string) *Node {
 	depth := 0
 	for {
-		found := DLS(root, goal, depth)
+		found := DLS(root, goal, depth) // Mencoba mencari dengan kedalaman tertentu
 		if found != nil {
-			return found
+			return found // Mengembalikan nilai ditemukan
 		}
-		depth++
+		depth++ // Meningkatkan kedalaman dan mencoba lagi
 	}
 }
 
-// Depth-Limited Search (DLS)
+// (Depth-Limited Search - DLS)
 func DLS(node *Node, goal string, depth int) *Node {
 	if node.ID == goal {
-		return node
+		return node // Jika ID node sama dengan tujuan, kembalikan node ini
 	}
 	if depth > 0 {
-		node.Children = GetLinks(strings.TrimPrefix(node.ID, "/wiki/"), node)
+		node.Children = GetLinks(strings.TrimPrefix(node.ID, "/wiki/"), node) // Mengambil link anak jika belum mencapai batas kedalaman
 		for _, child := range node.Children {
-			found := DLS(child, goal, depth-1)
+			found := DLS(child, goal, depth-1) // Rekursif mencari pada anak dengan kedalaman dikurangi satu
 			if found != nil {
 				return found
 			}
 		}
 	}
-	return nil
+	return nil // Kembalikan nil jika tidak ditemukan
 }
 
 // func DriverIDS() {
