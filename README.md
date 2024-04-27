@@ -5,7 +5,6 @@
 * [General Information](#general-information)
 * [Requirements](#requirements)
 * [How to Run and Build (Windows)](#how-to-run-and-compile-windows)
-* [Screenshot](#screenshot)
 * [Program Structure](#program-structure)
 * [Author](#author)
 
@@ -25,7 +24,7 @@ $ git clone git@github.com:JonathanSaragih/Tubes2_BE_JoJiKa.git
 ```
 2. Open this repository in terminal
 
-### **Build (optional)**
+### **Build**
 1. Change your directory to the project directory 
 ```sh 
 $ cd src
@@ -36,9 +35,6 @@ $ cd src
 ```sh 
 $ go run .
 ```
-
-## **Screenshot**
-
 
 ## **Program Structure**
 ```
@@ -62,7 +58,7 @@ $ go run .
 ```
 
 ## Authors
-<img src="doc/JoJiKa.png" width="752" />
+<img src="./doc/JoJiKa.png" width="752" />
 
 | Name                  | GitHub                                            | NIM                  |
 | --------------------- | ------------------------------------------------- | --------------------- |
