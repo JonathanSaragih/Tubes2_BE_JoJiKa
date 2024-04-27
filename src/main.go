@@ -11,8 +11,9 @@ import (
 )
 
 type Response struct {
-	Path []string `json:"path"`
-	Time string   `json:"time"`
+	Path    []string `json:"path"`
+	Time    string   `json:"time"`
+	Visited int      `json:"visited"`
 }
 
 func main() {
@@ -29,7 +30,7 @@ func main() {
 			startURL := "https://en.wikipedia.org/wiki/" + startPage
 			endURL := "https://en.wikipedia.org/wiki/" + endPage
 			startTime := time.Now()
-			shortest := bfs.BFS(startURL, endURL)
+			shortest, visited := bfs.BFS(startURL, endURL)
 			elapsedTime := time.Since(startTime)
 
 			shortestPath := make([]string, len(shortest))
@@ -38,12 +39,12 @@ func main() {
 			}
 
 			// Write shortest path to response
-			json.NewEncoder(w).Encode(Response{Path: shortestPath, Time: elapsedTime.String()})
+			json.NewEncoder(w).Encode(Response{Path: shortestPath, Time: elapsedTime.String(), Visited: visited})
 		case "ids":
 			// Call IDS function from ids package
 			root := &ids.Node{ID: "/wiki/" + startPage, Children: ids.GetLinks(startPage, nil)} // Changed to GetLinks
 			startTime := time.Now()
-			result := ids.IDS(root, "/wiki/"+endPage)
+			result, visited := ids.IDS(root, "/wiki/"+endPage)
 			elapsedTime := time.Since(startTime)
 
 			path := make([]string, 0)
@@ -52,7 +53,7 @@ func main() {
 			}
 
 			// Write result path to response
-			json.NewEncoder(w).Encode(Response{Path: path, Time: elapsedTime.String()}) // Changed to use Response struct
+			json.NewEncoder(w).Encode(Response{Path: path, Time: elapsedTime.String(), Visited: visited}) // Changed to use Response struct
 		default:
 			// Handle unknown method
 			http.Error(w, "Unknown method: "+method, http.StatusBadRequest)

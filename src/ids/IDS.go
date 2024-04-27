@@ -48,26 +48,30 @@ func GetLinks(input string, parent *Node) []*Node {
 }
 
 // (Iterative Deepening Search - IDS)
-func IDS(root *Node, goal string) *Node {
+func IDS(root *Node, goal string) (*Node, int) {
 	depth := 0
+	visited := 0
 	for {
-		found := DLS(root, goal, depth) // Mencoba mencari dengan kedalaman tertentu
+		found := DLS(root, goal, depth, &visited) // Mencoba mencari dengan kedalaman tertentu
 		if found != nil {
-			return found // Mengembalikan nilai ditemukan
+			return found, visited // Mengembalikan nilai ditemukan dan jumlah halaman yang dikunjungi
 		}
 		depth++ // Meningkatkan kedalaman dan mencoba lagi
 	}
 }
 
 // (Depth-Limited Search - DLS)
-func DLS(node *Node, goal string, depth int) *Node {
+func DLS(node *Node, goal string, depth int, visited *int) *Node {
 	if node.ID == goal {
 		return node // Jika ID node sama dengan tujuan, kembalikan node ini
 	}
 	if depth > 0 {
 		node.Children = GetLinks(strings.TrimPrefix(node.ID, "/wiki/"), node) // Mengambil link anak jika belum mencapai batas kedalaman
+		*visited += len(node.Children)                                        // Menambahkan jumlah halaman yang dikunjungi
 		for _, child := range node.Children {
-			found := DLS(child, goal, depth-1) // Rekursif mencari pada anak dengan kedalaman dikurangi satu
+			// print the current path (parent -> child)
+			fmt.Println(node.ID, " -> ", child.ID)
+			found := DLS(child, goal, depth-1, visited) // Rekursif mencari pada anak dengan kedalaman dikurangi satu
 			if found != nil {
 				return found
 			}

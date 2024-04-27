@@ -37,18 +37,19 @@ func fetchLinks(pageURL string) ([]Link, error) {
 	return links, nil
 }
 
-func BFS(startURL, endURL string) []Link {
+func BFS(startURL, endURL string) ([]Link, int) {
 	queue := []Link{{URL: startURL}}
 	visited := make(map[string]bool)
 	path := make(map[string][]Link)
 	path[startURL] = []Link{{URL: startURL}} // Initialize the path for the start URL
+	visitedCount := 0
 
 	for len(queue) > 0 {
 		currentLink := queue[0]
 		queue = queue[1:]
 
 		if currentLink.URL == endURL {
-			return path[currentLink.URL]
+			return path[currentLink.URL], visitedCount
 		}
 
 		if visited[currentLink.URL] {
@@ -71,13 +72,14 @@ func BFS(startURL, endURL string) []Link {
 				queue = append(queue, link)
 
 				if link.URL == endURL {
-					return path[link.URL]
+					return path[link.URL], visitedCount
 				}
 			}
+			visitedCount++
 		}
 	}
 
-	return nil
+	return nil, visitedCount
 }
 
 // func main() {
